@@ -36,7 +36,7 @@ pip-selfcheck.json
 !.vscode/launch.json
 !.vscode/tasks.json
 
-# Cast dev settings
+# #Cast dev settings
 # src/cast/dev_const.ts
 
 # Secrets
