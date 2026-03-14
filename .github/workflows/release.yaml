@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      contents: write 
-      id-token: write 
+      contents: write
+      id-token: write
     if: github.repository_owner == 'yuanzhou029'
     steps:
       - name: Checkout the repository
@@ -49,7 +49,7 @@ jobs:
           script/release
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a5527e # v1.13.0
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
@@ -94,7 +94,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_SKIP: "*-win32 *_i686 pp*"  # 跳过不需要的平台
+          CIBW_SKIP: "*-win32 *_i686 pp*" # 跳过不需要的平台
           CIBW_BUILD_FRONTEND: build
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.image }}
           CIBW_MANYLINUX_AARCH64_IMAGE: ${{ matrix.image }}
