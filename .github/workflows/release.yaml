@@ -46,6 +46,7 @@ jobs:
         run: |
           python3 -m pip install build
           chmod +x script/release
+          chmod +x script/build_frontend
           export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
           script/release
 
