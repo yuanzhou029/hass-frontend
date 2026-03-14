@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Verify version
-        uses: home-assistant/actions/helpers/verify-version@master
+        uses: home-assistant/actions/helpers/verify-version@97c27c298c11e85698b6ffc9c17db32c86bba1fb
 
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up QEMU
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        uses: docker/setup-qemu-action@5c3b63b9e7c90c9b1a10e3c4a4f465d1b5cb7e05 # v3.2.0
         if: matrix.platform == 'linux'
 
       - name: Build wheels for ${{ matrix.platform }}-${{ matrix.arch }}
@@ -127,7 +127,7 @@ jobs:
           ls -la dist/
 
       - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           files: |
             dist/*.whl
