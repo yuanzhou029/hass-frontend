@@ -84,14 +84,14 @@ jobs:
             image: ""
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         if: matrix.platform == 'linux'
 
       - name: Build wheels for ${{ matrix.platform }}-${{ matrix.arch }}
-        uses: pypa/cibuildwheel@v2.17.0
+        uses: pypa/cibuildwheel@35e454e098a7e0e0e5d8ca3ea7bc3d0c6d5de62c # v2.17.0
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_SKIP: "*-win32 *_i686 pp*" # 跳过不需要的平台
@@ -102,7 +102,7 @@ jobs:
           output-dir: dist-multiplatform
 
       - name: Upload multi-platform wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: wheels-${{ matrix.platform }}-${{ matrix.arch }}
           path: dist-multiplatform/
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all wheel artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           pattern: wheels-*
           merge-multiple: true
