@@ -41,7 +41,10 @@ jobs:
           yarn install
           chmod +x script/release
           chmod +x script/build_frontend
-          chmod +x landing-page/script/build_landing_page
+
+      - name: Build and release package
+        run: |
+          python3 -m pip install build
           export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
           script/release
 
@@ -49,7 +52,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip-existing: true
 
       - name: Upload release assets
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
@@ -58,99 +60,33 @@ jobs:
             dist/*.whl
             dist/*.tar.gz
 
-  # 替换原来的 wheels-init 作业 - 构建多平台轮子
-  build-multi-platform-wheels:
-    name: Build Multi-Platform Wheels
-    needs: release
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # 支持多种架构和平台
-        include:
-          - platform: linux
-            arch: x86_64
-            image: manylinux_2_28
-          - platform: linux
-            arch: aarch64
-            image: manylinux_2_28
-          - platform: macos
-            arch: x86_64
-            image: ""
-          - platform: macos
-            arch: arm64
-            image: ""
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@5c3b63b9e7c90c9b1a10e3c4a4f465d1b5cb7e05 # v3.2.0
-        if: matrix.platform == 'linux'
-
-      - name: Build wheels for ${{ matrix.platform }}-${{ matrix.arch }}
-        uses: pypa/cibuildwheel@35e454e098a7e0e0e5d8ca3ea7bc3d0c6d5de62c # v2.17.0
-        env:
-          CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_SKIP: "*-win32 *_i686 pp*" # 跳过不需要的平台
-          CIBW_BUILD_FRONTEND: build
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.image }}
-          CIBW_MANYLINUX_AARCH64_IMAGE: ${{ matrix.image }}
-        with:
-          output-dir: dist-multiplatform
-
-      - name: Upload multi-platform wheels
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: wheels-${{ matrix.platform }}-${{ matrix.arch }}
-          path: dist-multiplatform/
-          retention-days: 1
-
-  # 合并所有轮子并发布到 GitHub Release
-  publish-multi-platform-wheels:
-    name: Publish Multi-Platform Wheels
-    needs: build-multi-platform-wheels
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all wheel artifacts
-        uses: actions/download-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          pattern: wheels-*
-          merge-multiple: true
-          path: dist/
-
-      - name: List all wheels
-        run: |
-          echo "All built wheels:"
-          ls -la dist/
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        with:
-          files: |
-            dist/*.whl
-            dist/*.tar.gz
-          append_body: true
-
   release-landing-page:
     name: Release landing-page frontend
     if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to upload release assets
+      contents: write
     steps:
       - name: Checkout the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version-file: ".nvmrc"
           cache: yarn
+
       - name: Install dependencies
-        run: yarn install
+        run: |
+          yarn install
+          chmod +x landing-page/script/build_landing_page
+
       - name: Build landing-page
         run: landing-page/script/build_landing_page
+
       - name: Tar folder
-        run: tar -czf landing-page/home_assistant_frontend_landingpage-${{ github.event.release.tag_name }}.tar.gz -C landing-page/dist .
+        run: tar -czf landing-page/home_assistant_frontend_landingpage-${{ github.event.release.tag_name }}.tar.gz -C landge/dist .
+
       - name: Upload release asset
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
