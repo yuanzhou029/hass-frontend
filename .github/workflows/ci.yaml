@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint and check format
+    name: Lint and 检查格式
     runs-on: ubuntu-latest
     steps:
       - name: Check out files from GitHub
@@ -53,7 +53,7 @@ jobs:
         run: yarn run lint:prettier
 
   test:
-    name: Run tests
+    name: 运行测试
     runs-on: ubuntu-latest
     steps:
       - name: Check out files from GitHub
@@ -71,7 +71,7 @@ jobs:
         run: yarn run test
 
   build:
-    name: Build frontend
+    name: 构建前端
     needs: [lint, test]
     runs-on: ubuntu-latest
     steps:

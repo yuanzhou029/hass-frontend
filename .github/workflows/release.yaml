@@ -9,9 +9,6 @@ env:
   PYTHON_VERSION: "3.14"
   NODE_OPTIONS: --max_old_space_size=6144
 
-# Set default workflow permissions
-# All scopes not mentioned here are set to no access
-# https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 permissions:
   actions: none
 
@@ -21,9 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      contents: write # Required to upload release assets
-      id-token: write # For "Trusted Publisher" to PyPi
-    if: github.repository_owner == 'home-assistant'
+      contents: write 
+      id-token: write 
+    if: github.repository_owner == 'yuanzhou029'
     steps:
       - name: Checkout the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -45,11 +42,6 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Download Translations
-        run: ./script/translations_download
-        env:
-          LOKALISE_TOKEN: ${{ secrets.LOKALISE_TOKEN }}
-
       - name: Build and release package
         run: |
           python3 -m pip install build
@@ -57,8 +49,9 @@ jobs:
           script/release
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a5527e # v1.13.0
         with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
       - name: Upload release assets
@@ -68,27 +61,78 @@ jobs:
             dist/*.whl
             dist/*.tar.gz
 
-  wheels-init:
-    name: Init wheels build
+  # 替换原来的 wheels-init 作业 - 构建多平台轮子
+  build-multi-platform-wheels:
+    name: Build Multi-Platform Wheels
     needs: release
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 支持多种架构和平台
+        include:
+          - platform: linux
+            arch: x86_64
+            image: manylinux_2_28
+          - platform: linux
+            arch: aarch64
+            image: manylinux_2_28
+          - platform: macos
+            arch: x86_64
+            image: ""
+          - platform: macos
+            arch: arm64
+            image: ""
     steps:
-      - name: Generate requirements.txt
-        run: |
-          # Sleep to give pypi time to populate the new version across mirrors
-          sleep 240
-          version=$(echo "${{ github.ref }}" | awk -F"/" '{print $NF}' )
-          echo "home-assistant-frontend==$version" > ./requirements.txt
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # home-assistant/wheels doesn't support SHA pinning
-      - name: Build wheels
-        uses: home-assistant/wheels@2025.12.0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        if: matrix.platform == 'linux'
+
+      - name: Build wheels for ${{ matrix.platform }}-${{ matrix.arch }}
+        uses: pypa/cibuildwheel@v2.17.0
+        env:
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_SKIP: "*-win32 *_i686 pp*"  # 跳过不需要的平台
+          CIBW_BUILD_FRONTEND: build
+          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.image }}
+          CIBW_MANYLINUX_AARCH64_IMAGE: ${{ matrix.image }}
         with:
-          abi: cp314
-          tag: musllinux_1_2
-          arch: amd64
-          wheels-key: ${{ secrets.WHEELS_KEY }}
-          requirements: "requirements.txt"
+          output-dir: dist-multiplatform
+
+      - name: Upload multi-platform wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist-multiplatform/
+          retention-days: 1
+
+  # 合并所有轮子并发布到 GitHub Release
+  publish-multi-platform-wheels:
+    name: Publish Multi-Platform Wheels
+    needs: build-multi-platform-wheels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: List all wheels
+        run: |
+          echo "All built wheels:"
+          ls -la dist/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          append_body: true
 
   release-landing-page:
     name: Release landing-page frontend
@@ -106,10 +150,6 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install
-      - name: Download Translations
-        run: ./script/translations_download
-        env:
-          LOKALISE_TOKEN: ${{ secrets.LOKALISE_TOKEN }}
       - name: Build landing-page
         run: landing-page/script/build_landing_page
       - name: Tar folder
