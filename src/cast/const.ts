@@ -1,4 +1,4 @@
-import { CAST_DEV_APP_ID } from "./dev_const";
+import { CAST_DEV_APP_ID } from "./dev_const.ts";
 
 // Guard dev mode with `__dev__` so it can only ever be enabled in dev mode.
 export const CAST_DEV = __DEV__ && true;
