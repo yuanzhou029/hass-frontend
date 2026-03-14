@@ -3,16 +3,14 @@ name: CI
 on:
   push:
     branches:
-      - dev
-      - master
+      - main
   pull_request:
     branches:
-      - dev
-      - master
+      - main
 
 env:
   NODE_OPTIONS: --max_old_space_size=6144
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -53,6 +51,7 @@ jobs:
         run: yarn run lint:lit --quiet
       - name: Run prettier
         run: yarn run lint:prettier
+
   test:
     name: Run tests
     runs-on: ubuntu-latest
@@ -70,6 +69,7 @@ jobs:
         run: ./node_modules/.bin/gulp gen-icons-json build-translations build-locale-data
       - name: Run Tests
         run: yarn run test
+
   build:
     name: Build frontend
     needs: [lint, test]

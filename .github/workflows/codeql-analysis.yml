@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "安全漏洞扫描"
 
 on:
   push:

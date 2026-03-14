@@ -1,4 +1,4 @@
-name: RelativeCI
+name: 分析前端资源大小变化
 
 on:
   workflow_run:
