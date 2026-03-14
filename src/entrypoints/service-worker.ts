@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 
 /// <reference path="../types/service-worker.d.ts" />
-/* global ServiceWorkerGlobalScope */
+/* global self */
 import type { RouteHandler } from "workbox-core";
 import { cacheNames } from "workbox-core";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
