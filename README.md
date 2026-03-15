@@ -1,33 +1,37 @@
-# Home Assistant Frontend
+# 小鸥智能 WEB前端
 
-The frontend for [Home Assistant](https://www.home-assistant.io/).
+的web页面 [XOAI](https://xoai.140407.xyz).
 
-## Development
+## 发展
 
-### Prerequisites
+### 条件
 
 - Node.js (see `.nvmrc` for version)
 - Python 3.14+
 - Yarn
 
-### Setup
+### 设置
 
 ```bash
 yarn install
 ```
 
-### Building
+### 构建
 
 ```bash
 script/build_frontend
 ```
 
-### Release
+### 发布
 
 ```bash
 script/release
 ```
 
-## License
+## 许可证
 
 Apache License 2.0 - See LICENSE file for details.
+
+## 原项目
+
+项目是根据 Home Assistant Frontend 进行的修改使用的，在此对Home Assistant Frontend进行鸣谢！
