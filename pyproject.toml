@@ -7,7 +7,7 @@ name         = "xoai-frontend"
 version      = "202603.15.0"
 license      = "Apache-2.0"
 license-files = ["LICENSE*"]
-description  = "The Home Assistant frontend"
+description  = "小鸥智能的web页面"
 readme       = "README.md"
 authors      = [
     {name = "The Home Assistant Authors", email = "hello@home-assistant.io"}
@@ -15,7 +15,7 @@ authors      = [
 requires-python = ">=3.14.0"
 
 [project.urls]
-"Homepage" = "https://github.com/home-assistant/frontend"
+"Homepage" = "https://github.com/yuanzhou029/hass"
 
 [tool.setuptools]
 include-package-data = true
