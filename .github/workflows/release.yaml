@@ -60,7 +60,10 @@ jobs:
         run: |
           python3 -m pip install build
           export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
-          script/release
+          yarn install
+          ./node_modules/.bin/gulp build-app
+          rm -rf dist xoai-frontend.egg-info
+          python3 -m build -q
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
