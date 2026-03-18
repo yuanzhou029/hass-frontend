@@ -22,7 +22,6 @@ jobs:
     environment: pypi
     permissions:
       contents: write # Required to upload release assets
-      id-token: write # For "Trusted Publisher" to PyPi (OIDC authentication)
     if: github.repository_owner == 'yuanzhou029'
     steps:
       - name: Checkout the repository
@@ -56,17 +55,10 @@ jobs:
           export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
           script/release
 
-      - name: Publish to PyPI with token
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip-existing: true
-
-      - name: Publish to PyPI with OIDC
-        if: ${{ secrets.PYPI_API_TOKEN == '' }}
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
-        with:
           skip-existing: true
 
       - name: Upload release assets
