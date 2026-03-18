@@ -136,7 +136,10 @@ jobs:
           fi
           echo "Translation validation completed successfully"
       - name: Build landing-page
-        run: landing-page/script/build_landing_page
+        run: |
+          cd landing-page
+          ./script/build_landing_page
+          cd ..
       - name: Tar folder
         run: tar -czf landing-page/home_assistant_frontend_landingpage-${{ github.event.release.tag_name }}.tar.gz -C landing-page/dist .
       - name: Upload release asset
