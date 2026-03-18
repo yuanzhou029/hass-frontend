@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_path:
+        description: "Path to the package directory"
+        required: true
+        default: 'E:\home_frontend\homeassistant-2026.3.1'
+
+env:
+  PYTHON_VERSION: "3.14"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build distribution packages
+        run: |
+          cd ${{ github.event.inputs.package_path }}
+          python -m build
+
+      - name: Check package metadata
+        run: |
+          cd ${{ github.event.inputs.package_path }}
+          twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        with:
+          packages-dir: ${{ github.event.inputs.package_path }}/dist
+          skip-existing: false
+          verbose: true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@6f51b8e3533c4e4174f9e0ce4dcad2b3286fd497 # v4.5.0
+        with:
+          name: distribution-packages
+          path: ${{ github.event.inputs.package_path }}/dist/
+          retention-days: 30
