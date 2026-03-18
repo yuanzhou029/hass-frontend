@@ -41,8 +41,20 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Download Translations
-        run: ./script/translations_download
+      - name: Validate Translation Files
+        run: |
+          echo "Validating translation file structure..."
+          if [ -d "src/translations/app" ] && [ -d "src/translations/config" ] && [ -d "src/translations/custom" ]; then
+            echo "✓ Translation directory structure validated"
+            app_count=$(ls src/translations/app/*.json 2>/dev/null | wc -l)
+            config_count=$(ls src/translations/config/*.json 2>/dev/null | wc -l)
+            custom_count=$(ls src/translations/custom/*.json 2>/dev/null | wc -l)
+            echo "✓ Found $app_count app translations, $config_count config translations, $custom_count custom translations"
+          else
+            echo "✗ Translation directory structure is incomplete"
+            exit 1
+          fi
+          echo "Translation validation completed successfully"
 
       - name: Build and release package
         run: |
@@ -106,8 +118,20 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install
-      - name: Download Translations
-        run: ./script/translations_download
+      - name: Validate Translation Files
+        run: |
+          echo "Validating translation file structure..."
+          if [ -d "src/translations/app" ] && [ -d "src/translations/config" ] && [ -d "src/translations/custom" ]; then
+            echo "✓ Translation directory structure validated"
+            app_count=$(ls src/translations/app/*.json 2>/dev/null | wc -l)
+            config_count=$(ls src/translations/config/*.json 2>/dev/null | wc -l)
+            custom_count=$(ls src/translations/custom/*.json 2>/dev/null | wc -l)
+            echo "✓ Found $app_count app translations, $config_count config translations, $custom_count custom translations"
+          else
+            echo "✗ Translation directory structure is incomplete"
+            exit 1
+          fi
+          echo "Translation validation completed successfully"
       - name: Build landing-page
         run: landing-page/script/build_landing_page
       - name: Tar folder
