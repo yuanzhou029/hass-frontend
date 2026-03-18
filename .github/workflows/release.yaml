@@ -43,8 +43,6 @@ jobs:
 
       - name: Download Translations
         run: ./script/translations_download
-        env:
-          LOKALISE_TOKEN: ${{ secrets.LOKALISE_TOKEN }}
 
       - name: Build and release package
         run: |
@@ -110,8 +108,6 @@ jobs:
         run: yarn install
       - name: Download Translations
         run: ./script/translations_download
-        env:
-          LOKALISE_TOKEN: ${{ secrets.LOKALISE_TOKEN }}
       - name: Build landing-page
         run: landing-page/script/build_landing_page
       - name: Tar folder
