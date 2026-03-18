@@ -32,9 +32,6 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Verify version
-        uses: home-assistant/actions/helpers/verify-version@master
-
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -78,7 +75,7 @@ jobs:
           # Sleep to give pypi time to populate the new version across mirrors
           sleep 240
           version=$(echo "${{ github.ref }}" | awk -F"/" '{print $NF}' )
-          echo "home-assistant-frontend==$version" > ./requirements.txt
+          echo "xoai-frontend==$version" > ./requirements.txt
 
       # Use custom wheels service for building wheels
       - name: Build wheels
