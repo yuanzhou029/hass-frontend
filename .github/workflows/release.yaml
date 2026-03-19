@@ -54,7 +54,9 @@ jobs:
           echo "Translation validation completed successfully"
 
       - name: Prepare translation files
-        run: ./script/prepare-translations.sh
+        run: |
+          chmod +x ./script/prepare-translations.sh
+          ./script/prepare-translations.sh
 
       - name: Build and release package
         run: |
@@ -143,7 +145,9 @@ jobs:
           echo "Translation validation completed successfully"
 
       - name: Prepare translation files
-        run: ./script/prepare-translations.sh
+        run: |
+          chmod +x ./script/prepare-translations.sh
+          ./script/prepare-translations.sh
 
       - name: Build landing-page
         run: ./node_modules/.bin/gulp build-landing-page
