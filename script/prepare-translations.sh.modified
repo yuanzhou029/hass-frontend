@@ -36,67 +36,57 @@ for dir in app config custom; do
     done
 done
 
-# 使用Python合并JSON文件的函数
+# 合并翻译文件的函数
 merge_json_files() {
     local lang_code=$1
     local output_file=$2
     local temp_file="$TEMP_DIR/merge_temp.json"
+    local prev_file="$TEMP_DIR/prev_merge.json"
     
-    # 临时存储合并结果的Python脚本
-    local python_script="$TEMP_DIR/merge_json.py"
+    # 初始化为空
+    > "$temp_file"
     
-    # 创建Python合并脚本 - 包含调试信息
-    cat > "$python_script" << 'EOF'
-import json
-import sys
-import os
-import glob
-from collections import defaultdict
-
-lang_code = sys.argv[1]
-base_dir = sys.argv[2]
-
-print(f"Processing language: {lang_code}", file=sys.stderr)
-
-result = {}
-
-# 按顺序合并 app, config, custom 目录中的翻译
-for dir_name in ["app", "config", "custom"]:
-    pattern = f"{base_dir}/src/translations/{dir_name}/{lang_code}-*.json"
-    files = glob.glob(pattern)
+    # 按顺序合并 app, config, custom 目录中的翻译文件
+    for dir in app config custom; do
+        json_file=$(find "src/translations/$dir" -name "${lang_code}-*.json" -type f 2>/dev/null | head -n 1)
+        if [ -f "$json_file" ]; then
+            echo "  Processing $dir translations for $lang_code..."
+            
+            if [ ! -s "$temp_file" ]; then
+                # 如果是第一次，直接复制内容
+                cp "$json_file" "$temp_file"
+            else
+                # 否则合并到现有内容
+                mv "$temp_file" "$prev_file"
+                
+                # 提取两个JSON文件的内容并合并
+                # 从第一个文件中提取内容（去掉首尾的花括号）
+                prev_content=$(sed '1d;$d' "$prev_file" | sed 's/,$//')
+                # 从第二个文件中提取内容（去掉首尾的花括号）
+                new_content=$(sed '1d;$d' "$json_file" | sed 's/,$//')
+                
+                # 创建合并后的新内容
+                {
+                    echo "{"
+                    if [ -n "$prev_content" ]; then
+                        echo "$prev_content" | sed 's/^/  /'
+                        # 如果新内容不为空，添加逗号分隔
+                        if [ -n "$(echo "$new_content" | tr -d '[:space:]')" ]; then
+                            echo ","
+                        fi
+                    fi
+                    if [ -n "$new_content" ]; then
+                        echo "$new_content" | sed 's/^/  /'
+                    fi
+                    echo "}"
+                } > "$temp_file"
+            fi
+        fi
+    done
     
-    print(f"Looking for files with pattern: {pattern}", file=sys.stderr)
-    print(f"Found files: {files}", file=sys.stderr)
-    
-    if files:
-        with open(files[0], 'r', encoding='utf-8') as f:
-            try:
-                data = json.load(f)
-                print(f"Loaded {len(data)} keys from {files[0]}", file=sys.stderr)
-                # 更新结果字典，新值会覆盖旧值
-                result.update(data)
-            except json.JSONDecodeError as e:
-                print(f"Warning: Could not decode JSON from {files[0]}: {e}", file=sys.stderr)
-
-print(f"Final result has {len(result)} keys", file=sys.stderr)
-
-# 输出合并结果
-output_file = sys.argv[3]
-with open(output_file, 'w', encoding='utf-8') as f:
-    json.dump(result, f, ensure_ascii=False, indent=2)
-    
-print(f"Written merged translation to {output_file}", file=sys.stderr)
-EOF
-
-    # 运行Python脚本进行合并
-    python3 "$python_script" "$lang_code" "$(pwd)" "$temp_file" 2>/dev/null || python "$python_script" "$lang_code" "$(pwd)" "$temp_file"
-    
-    # 检查是否成功生成了合并后的文件
+    # 输出合并后的内容到目标文件
     if [ -s "$temp_file" ]; then
         cp "$temp_file" "$output_file"
-        echo "  Merged translation for $lang_code written to $output_file"
-    else
-        echo "  Warning: Failed to merge translation for $lang_code"
     fi
 }
 
