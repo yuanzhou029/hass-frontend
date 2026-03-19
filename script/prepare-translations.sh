@@ -7,6 +7,10 @@ cd "$(dirname "$0")/.."
 
 echo "Preparing translation files for build..."
 
+# 设置环境变量，跳过夜间翻译获取
+export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
+echo "Set SKIP_FETCH_NIGHTLY_TRANSLATIONS=1 to prevent overwriting translations"
+
 # 创建临时目录用于处理翻译文件
 TEMP_DIR=$(mktemp -d)
 echo "Using temporary directory: $TEMP_DIR"

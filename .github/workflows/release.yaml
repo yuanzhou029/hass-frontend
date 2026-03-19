@@ -60,6 +60,7 @@ jobs:
 
       - name: Build and release package
         run: |
+          export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
           python3 -m pip install build
           yarn install
           ./node_modules/.bin/gulp build-app
@@ -153,7 +154,9 @@ jobs:
           ./script/prepare-translations.sh
 
       - name: Build landing-page
-        run: ./node_modules/.bin/gulp build-landing-page
+        run: |
+          export SKIP_FETCH_NIGHTLY_TRANSLATIONS=1
+          ./node_modules/.bin/gulp build-landing-page
 
       - name: Clean up translation files
         if: always()
